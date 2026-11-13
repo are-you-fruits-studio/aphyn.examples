@@ -15,6 +15,8 @@ with `aphyn build`.
 | [boids](examples/boids) | A hundred triangles flocking: a simulation split into ordered systems, settings in a resource | `just dev boids` |
 | [gizmos](examples/gizmos) | Debug lines in clip, window and world space, with a fly camera (WASD, R/F, Q/E) | `just dev gizmos` |
 | [collisions](examples/collisions) | Collider grid picked with the mouse, and an overlap test between a box and a rotated box | `just dev collisions` |
+| [text](examples/text) | Bitmap-font text in world space, rewritten every frame with the elapsed time | `just dev text` |
+| [ui](examples/ui) | Rect-based UI: nested and masked panels, a laid-out column, a label, a square following the mouse | `just dev ui` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
