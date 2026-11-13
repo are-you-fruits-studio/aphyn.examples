@@ -12,6 +12,7 @@ with `aphyn build`.
 |---|---|---|
 | [cubes](examples/cubes) | Spinning, sliding cubes: a mesh built in code, unlit material, camera, transform hierarchy | `just dev cubes` |
 | [ecs](examples/ecs) | The ECS without rendering: spawning, queries, optional components and resources, despawning (console output) | `just dev ecs` |
+| [boids](examples/boids) | A hundred triangles flocking: a simulation split into ordered systems, settings in a resource | `just dev boids` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
