@@ -1,0 +1,7 @@
+{
+  "asset_type": "texture",
+  "raw_texture": "normal_map.png",
+  "format": {
+    "$enum_variant": "Rgba8Unorm"
+  }
+}
