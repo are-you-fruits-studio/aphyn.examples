@@ -6,6 +6,14 @@ with `aphyn build`.
 
 **Work in progress:** the examples are being moved here from the engine repository one by one.
 
+## Examples
+
+| Example | What it shows | Run |
+|---|---|---|
+| [cubes](examples/cubes) | Spinning, sliding cubes: a mesh built in code, unlit material, camera, transform hierarchy | `just dev cubes` |
+
+`just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
+
 ## License
 
 Code is licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT),
