@@ -18,6 +18,7 @@ with `aphyn build`.
 | [text](examples/text) | Bitmap-font text in world space, rewritten every frame with the elapsed time | `just dev text` |
 | [ui](examples/ui) | Rect-based UI: nested and masked panels, a laid-out column, a label, a square following the mouse | `just dev ui` |
 | [material](examples/material) | Custom WGSL shaders: a material template, a material recolored at runtime, a vignette post-processing pass | `just dev material` |
+| [physics](examples/physics) | Rigidbodies drawn as collider wireframes: layers, a mesh floor, a compound body, mouse dragging, an orbit camera | `just dev physics` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
