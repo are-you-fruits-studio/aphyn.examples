@@ -1,0 +1,13 @@
+# Cargo build output (one per example, plus a shared one in CI)
+target/
+
+# `aphyn build` output and the downloaded engine binaries
+builds/
+.engine/
+
+# Editors and OS
+.idea/
+.vscode/
+*.rs.bk
+*.pdb
+.DS_Store
