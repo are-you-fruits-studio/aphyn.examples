@@ -1,0 +1,94 @@
+name: Nightly against aphyn@dev
+
+# Builds every example against the engine's dev branch. The tag is swapped
+# for `branch = "dev"` inside the job only; nothing is committed. A failure
+# opens (or comments on) the issue below; the next green run closes it.
+
+on:
+  schedule:
+    - cron: "37 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+  CARGO_TARGET_DIR: ${{ github.workspace }}/target
+  LOCKED: "0"
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: List examples
+        id: examples
+        run: |
+          names=$(bash .github/scripts/examples.sh list | tr '\n' ' ')
+          echo "Examples: ${names:-none}"
+          echo "any=$([ -n "$names" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain (from rust-toolchain.toml)
+        if: steps.examples.outputs.any == 'true'
+        run: rustup toolchain install
+
+      - name: Install Linux dependencies
+        if: steps.examples.outputs.any == 'true' && runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
+
+      - name: Switch to aphyn@dev
+        if: steps.examples.outputs.any == 'true'
+        run: bash .github/scripts/examples.sh use-dev
+
+      - name: Build
+        if: steps.examples.outputs.any == 'true'
+        run: bash .github/scripts/examples.sh build
+
+  report:
+    name: Report
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TITLE: Examples broken against aphyn@dev
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      RESULT: ${{ needs.build.result }}
+    steps:
+      - name: Open, update or close the issue
+        run: |
+          set -euo pipefail
+          # only the issue this workflow opened, not one anyone could create with the same title
+          number=$(gh issue list --state open --author app/github-actions --search "\"$TITLE\" in:title" --json number,title \
+            --jq "map(select(.title == env.TITLE)) | .[0].number // empty")
+          if [ "$RESULT" = "failure" ]; then
+            body="The nightly build against \`aphyn@dev\` failed: $RUN_URL"
+            if [ -n "$number" ]; then
+              gh issue comment "$number" --body "$body"
+            else
+              gh issue create --title "$TITLE" --body "$body"
+            fi
+          elif [ "$RESULT" = "success" ] && [ -n "$number" ]; then
+            gh issue close "$number" --comment "Fixed: the nightly build is green again. $RUN_URL"
+          fi

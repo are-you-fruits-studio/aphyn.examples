@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+  # One target dir for all examples, so the engine is compiled once per job.
+  CARGO_TARGET_DIR: ${{ github.workspace }}/target
+
+jobs:
+  engine-tag:
+    name: Same aphyn tag everywhere
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - run: bash .github/scripts/examples.sh check-tags
+
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: List examples
+        id: examples
+        run: |
+          names=$(bash .github/scripts/examples.sh list | tr '\n' ' ')
+          echo "Examples: ${names:-none}"
+          echo "any=$([ -n "$names" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain (from rust-toolchain.toml)
+        if: steps.examples.outputs.any == 'true'
+        run: rustup toolchain install
+
+      - name: Install Linux dependencies
+        if: steps.examples.outputs.any == 'true' && runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
+
+      - name: Rust cache
+        if: steps.examples.outputs.any == 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+          key: ${{ hashFiles('examples/*/scripts/Cargo.lock') }}
+
+      - name: Format and clippy
+        if: steps.examples.outputs.any == 'true'
+        run: bash .github/scripts/examples.sh lint
+
+      - name: Build
+        if: steps.examples.outputs.any == 'true'
+        run: bash .github/scripts/examples.sh build
