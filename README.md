@@ -17,6 +17,8 @@ with `aphyn build`.
 | [collisions](examples/collisions) | Collider grid picked with the mouse, and an overlap test between a box and a rotated box | `just dev collisions` |
 | [text](examples/text) | Bitmap-font text in world space, rewritten every frame with the elapsed time | `just dev text` |
 | [ui](examples/ui) | Rect-based UI: nested and masked panels, a laid-out column, a label, a square following the mouse | `just dev ui` |
+| [normals](examples/normals) | Normal mapping: a tiled normal map lit by a point light that follows the mouse | `just dev normals` |
+| [bloom](examples/bloom) | Bloom post-processing: a strong point light blows a floor out past white and it glows; the cube mesh is loaded from `.obj` | `just dev bloom` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
