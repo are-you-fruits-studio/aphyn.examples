@@ -13,6 +13,8 @@ with `aphyn build`.
 | [cubes](examples/cubes) | Spinning, sliding cubes: a mesh built in code, unlit material, camera, transform hierarchy | `just dev cubes` |
 | [ecs](examples/ecs) | The ECS without rendering: spawning, queries, optional components and resources, despawning (console output) | `just dev ecs` |
 | [boids](examples/boids) | A hundred triangles flocking: a simulation split into ordered systems, settings in a resource | `just dev boids` |
+| [gizmos](examples/gizmos) | Debug lines in clip, window and world space, with a fly camera (WASD, R/F, Q/E) | `just dev gizmos` |
+| [collisions](examples/collisions) | Collider grid picked with the mouse, and an overlap test between a box and a rotated box | `just dev collisions` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
