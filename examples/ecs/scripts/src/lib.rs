@@ -2,12 +2,13 @@
 //! cured, and the dead are despawned. All output goes to the console; the window stays empty.
 //!
 //! Shows entities and components, structural changes (create/destroy entities, add/remove
-//! components) through `WorldDataMut`, queries with an optional component and with a filter,
-//! a resource inserted at runtime and read through `Option<Res<_>>`, per-system state in
-//! `Local<_>`, and `Drop` running when an entity is despawned.
+//! components) through `EntitiesHolderMut`, or `WorldDataMut` when the same system also inserts a
+//! resource, queries with an optional component and with a filter, a resource inserted at runtime
+//! and read through `Option<Res<_>>`, per-system state in `Local<_>`, and `Drop` running when an
+//! entity is despawned.
 //!
 //! Engine modules: `aphyn_ecs` (world, components, resources, systems, schedules), `aphyn_app`
-//! (`TimeResource`, window settings).
+//! (`AppInitCtx`, `TimeResource`), `aphyn_window` (`WindowState`, for the window title).
 
 use aphyn::*;
 
@@ -76,11 +77,8 @@ struct FirstDeath {
     time: f64,
 }
 
-fn spawn_creatures(mut world: WorldDataMut) {
-    let now = world.as_ref().resources().get::<TimeResource>().unwrap().frame_time;
-
-    let mut resources = world.resources_mut();
-    let spawner = resources.get_mut::<Spawner>().unwrap();
+fn spawn_creatures(time: Res<TimeResource>, mut spawner: ResMut<Spawner>, mut entities: EntitiesHolderMut) {
+    let now = time.frame_time;
     if now < spawner.next_spawn_time {
         return;
     }
@@ -88,10 +86,8 @@ fn spawn_creatures(mut world: WorldDataMut) {
     let id = spawner.next_id;
     spawner.next_id += 1;
 
-    let mut entities = world.entities_mut();
     let creature = entities.create_entity();
-    entities.add_component(creature, Creature { id }).ok().unwrap();
-    entities.add_component(creature, Health(START_HEALTH)).ok().unwrap();
+    entities.set_components(creature, (Creature { id }, Health(START_HEALTH)));
 
     let poisoned = id.is_multiple_of(2);
     if poisoned {
@@ -108,9 +104,7 @@ fn lose_health(time: Res<TimeResource>, mut creatures: WorldQuery<(&mut Health, 
     }
 }
 
-fn cure_weak_creatures(mut world: WorldDataMut) {
-    let mut entities = world.entities_mut();
-
+fn cure_weak_creatures(mut entities: EntitiesHolderMut) {
     let weak = entities
         .query_filtered::<(EntityId, &Creature, &Health), WithFilter<Poisoned>>()
         .iter()
