@@ -1,0 +1,7 @@
+{
+    "asset_type": "material",
+    "template": "templates/debug.asset",
+    "data": {
+        "mode": { "$enum_variant": "F32", "0": 2.0 }
+    }
+}
