@@ -1,0 +1,4 @@
+{
+    "asset_type": "shader",
+    "wgsl": "shaders/lit_copy.wgsl"
+}
