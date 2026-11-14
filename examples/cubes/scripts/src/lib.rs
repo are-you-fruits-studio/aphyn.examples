@@ -6,7 +6,11 @@
 //! the parent's scale is inherited through the transform hierarchy.
 //!
 //! Engine modules: `aphyn_ecs` (entities, components, systems), `aphyn_transform` (local/global
-//! transforms, parent/child), `aphyn_render` (mesh, material, camera), `aphyn_app` (`TimeResource`).
+//! transforms, parent/child), `aphyn_render` (`RenderApiResource::create_mesh`, `StandardMesh`,
+//! `StandardVertex`, `Material`, `MaterialData`, `Camera`), `aphyn_render_features` (unlit
+//! template, `create_material_from_template_key`, `MeshComponent`, `MaterialComponent`,
+//! `CameraComponent`), `aphyn_asset_storage` (`AssetStorageResource`), `aphyn_math` (`Vec3`,
+//! `Quat`), `aphyn_app` (`TimeResource`).
 
 use aphyn::*;
 
@@ -40,27 +44,22 @@ fn spawn_camera(data: WorldDataMut) {
     let mut ec = data.into_entities_mut();
 
     let camera = ec.create_entity();
-    ec.add_component(
+    ec.set_components(
         camera,
-        GlobalTransform {
-            scale_rotation: Mat::IDENTITY,
-            position: Vec3::new(0.0, 0.0, -1.0),
-        },
-    )
-    .ok()
-    .unwrap();
-    ec.add_component(
-        camera,
-        CameraComponent(Camera {
-            near: 0.1,
-            far: 1_000.0,
-            projection: CameraProjection::Perspective {
-                fov: 90_f32.to_radians(),
+        (
+            LocalTransform {
+                position: Vec3::new(0.0, 0.0, -1.0),
+                ..LocalTransform::IDENTITY
             },
-        }),
-    )
-    .ok()
-    .unwrap();
+            CameraComponent(Camera {
+                near: 0.1,
+                far: 1_000.0,
+                projection: CameraProjection::Perspective {
+                    fov: 90_f32.to_radians(),
+                },
+            }),
+        ),
+    );
 }
 
 fn spawn_cubes(mut world: WorldDataMut) {
@@ -94,22 +93,22 @@ fn spawn_cubes(mut world: WorldDataMut) {
         let mut ec = world.entities_mut();
 
         let parent = ec.create_entity();
-        ec.add_component(parent, parent_transform).ok().unwrap();
+        ec.set_components(parent, (parent_transform,));
 
         let cube = ec.create_entity();
-        ec.add_component(cube, MeshComponent { mesh: mesh.clone() }).ok().unwrap();
-        ec.add_component(
+        ec.set_components(
             cube,
-            MaterialComponent {
-                material: material.clone(),
-            },
-        )
-        .ok()
-        .unwrap();
-        ec.add_component(cube, LocalTransform::IDENTITY).ok().unwrap();
-        ec.add_component(cube, ChildComponent { parent }).ok().unwrap();
-        ec.add_component(cube, RotatingCube).ok().unwrap();
-        ec.add_component(cube, MovingCube).ok().unwrap();
+            (
+                MeshComponent { mesh: mesh.clone() },
+                MaterialComponent {
+                    material: material.clone(),
+                },
+                LocalTransform::IDENTITY,
+                ChildComponent { parent },
+                RotatingCube,
+                MovingCube,
+            ),
+        );
     }
 }
 
