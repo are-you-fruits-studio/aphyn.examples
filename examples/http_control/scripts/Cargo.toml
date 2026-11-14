@@ -1,0 +1,19 @@
+[package]
+name = "http_control"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[lib]
+name = "lib_app"
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name = "launcher"
+path = "src/main.rs"
+
+[dependencies]
+aphyn = { git = "https://github.com/are-you-fruits-studio/aphyn", tag = "v0.21.1" }
+# blocking HTTP/1.1 server without an async runtime, so it can run on one plain thread
+tiny_http = "=0.12.0"
