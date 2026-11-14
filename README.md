@@ -17,6 +17,7 @@ with `aphyn build`.
 | [collisions](examples/collisions) | Collider grid picked with the mouse, and an overlap test between a box and a rotated box | `just dev collisions` |
 | [text](examples/text) | Bitmap-font text in world space, rewritten every frame with the elapsed time | `just dev text` |
 | [ui](examples/ui) | Rect-based UI: nested and masked panels, a laid-out column, a label, a square following the mouse | `just dev ui` |
+| [voxel_house](examples/voxel_house) | Stress test: a house of cube entities that explodes (Space), resets (R) and rebuilds from up to 352k cubes (1-9) | `just dev voxel_house` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
