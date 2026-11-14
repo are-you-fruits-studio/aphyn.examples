@@ -1,0 +1,18 @@
+{
+    "asset_type": "material_template",
+    "inputs": {
+        "color": { "default": { "$enum_variant": "Vec4", "0": { "x": 1.0, "y": 1.0, "z": 1.0, "w": 1.0 } } },
+        "edge_color": { "default": { "$enum_variant": "Vec4", "0": { "x": 1.0, "y": 1.0, "z": 1.0, "w": 1.0 } } },
+        "time": { "default": { "$enum_variant": "F32", "0": 0.0 } }
+    },
+    "passes": [{
+        "shader": "shaders/dissolve.asset",
+        "order": 5000000,
+        "target": { "$enum_variant": "Main" },
+        "values": [
+            { "input": "color", "group": 1, "binding": 0, "member": "color" },
+            { "input": "edge_color", "group": 1, "binding": 0, "member": "edge_color" },
+            { "input": "time", "group": 1, "binding": 0, "member": "time" }
+        ]
+    }]
+}

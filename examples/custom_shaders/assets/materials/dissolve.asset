@@ -1,0 +1,8 @@
+{
+    "asset_type": "material",
+    "template": "templates/dissolve.asset",
+    "data": {
+        "color": { "$enum_variant": "Vec4", "0": { "x": 0.531, "y": 0.531, "z": 0.612, "w": 1.0 } },
+        "edge_color": { "$enum_variant": "Vec4", "0": { "x": 1.0, "y": 0.173, "z": 0.006, "w": 1.0 } }
+    }
+}

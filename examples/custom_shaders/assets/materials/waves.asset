@@ -1,0 +1,7 @@
+{
+    "asset_type": "material",
+    "template": "templates/waves.asset",
+    "data": {
+        "color": { "$enum_variant": "Vec4", "0": { "x": 0.015, "y": 0.173, "z": 0.531, "w": 1.0 } }
+    }
+}

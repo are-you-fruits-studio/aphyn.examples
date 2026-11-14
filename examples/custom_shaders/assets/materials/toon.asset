@@ -1,0 +1,7 @@
+{
+    "asset_type": "material",
+    "template": "templates/toon.asset",
+    "data": {
+        "color": { "$enum_variant": "Vec4", "0": { "x": 0.047, "y": 0.325, "z": 0.793, "w": 1.0 } }
+    }
+}
