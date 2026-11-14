@@ -24,6 +24,7 @@ with `aphyn build`.
 | [bloom](examples/bloom) | Bloom post-processing: a strong point light blows a floor out past white and it glows; the cube mesh is loaded from `.obj` | `just dev bloom` |
 | [showcase](examples/showcase) | The engine's showcase loop: 450 boids in three flocks, lit and emissive materials, bloom, ACES, a normal-mapped floor, gizmos, text; `--capture` writes the loop as PNG frames | `just dev showcase` |
 | [audio_sfx](examples/audio_sfx) | Sound effects on number keys: one-shots, a loop, mixing, a stereo clip (left, right, both), mono 44.1 kHz clips, live left and right waveforms | `just dev audio_sfx` |
+| [mouse_input](examples/mouse_input) | Mouse position, buttons and wheel drawn with gizmos: a circle following the cursor that the wheel resizes, click and drag-marquee selection, right-click pings | `just dev mouse_input` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
