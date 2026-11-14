@@ -1,0 +1,17 @@
+[package]
+name = "custom_shaders"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[lib]
+name = "lib_app"
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name = "launcher"
+path = "src/main.rs"
+
+[dependencies]
+aphyn = { git = "https://github.com/are-you-fruits-studio/aphyn", tag = "v0.21.1" }

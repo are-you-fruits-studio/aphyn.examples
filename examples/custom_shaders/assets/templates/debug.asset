@@ -1,0 +1,12 @@
+{
+    "asset_type": "material_template",
+    "inputs": {
+        "mode": { "default": { "$enum_variant": "F32", "0": 0.0 } }
+    },
+    "passes": [{
+        "shader": "shaders/debug.asset",
+        "order": 5000000,
+        "target": { "$enum_variant": "Main" },
+        "values": [{ "input": "mode", "group": 1, "binding": 0, "member": "mode" }]
+    }]
+}
