@@ -17,6 +17,7 @@ with `aphyn build`.
 | [collisions](examples/collisions) | Collider grid picked with the mouse, and an overlap test between a box and a rotated box | `just dev collisions` |
 | [text](examples/text) | Bitmap-font text in world space, rewritten every frame with the elapsed time | `just dev text` |
 | [ui](examples/ui) | Rect-based UI: nested and masked panels, a laid-out column, a label, a square following the mouse | `just dev ui` |
+| [mouse_input](examples/mouse_input) | Mouse position, buttons and wheel drawn with gizmos: a circle following the cursor that the wheel resizes, click and drag-marquee selection, right-click pings | `just dev mouse_input` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
