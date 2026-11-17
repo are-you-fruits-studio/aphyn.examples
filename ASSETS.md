@@ -26,3 +26,4 @@ An asset is listed here before it is committed; an asset with an unknown license
 | `examples/custom_shaders/assets/shaders/lib/hash.wgsl` | Written for this example (the common `fract(sin(dot(p, k)) * 43758.5453)` hash idiom) | MIT OR Apache-2.0 | Are You Fruits studio |
 | `examples/custom_shaders/assets/shaders/lib/lights.wgsl` | Written for this example | MIT OR Apache-2.0 | Are You Fruits studio |
 | `examples/custom_shaders/assets/shaders/lib/noise.wgsl` | Written for this example | MIT OR Apache-2.0 | Are You Fruits studio |
+| `examples/shadows/assets/cube.obj` | From are-you-fruits-studio/aphyn@ec3f8c5, `crates/example/shadows/assets/` | MIT OR Apache-2.0 | Are You Fruits studio |
