@@ -55,6 +55,7 @@ pub fn init_app(ctx: AppInitCtx) {
         mut behavior,
         render,
         window,
+        ..
     } = ctx;
     window.size = WINDOW_SIZE;
     window.is_resizable = false;

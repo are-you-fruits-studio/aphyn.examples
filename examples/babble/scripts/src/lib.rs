@@ -2,9 +2,10 @@
 //! the typed letters go through a small synthesizer (`speech.rs`) that turns them into a short burst
 //! of gibberish "speech", the clip plays, and the green circle pulses with its loudness.
 //!
-//! Controls: printable ASCII keys type, Backspace deletes the last character, Enter (or keypad
-//! Enter) plays the current text. The field keeps its text, so you can edit a word and play it
-//! again. Other characters are ignored, because the built-in bitmap fonts only have ASCII glyphs.
+//! Controls: printable ASCII keys type, Backspace deletes the last character, and both repeat
+//! while held (the OS key repeat); Enter (or keypad Enter) plays the current text. The field keeps
+//! its text, so you can edit a word and play it again. Other characters are ignored, because the
+//! built-in bitmap fonts only have ASCII glyphs.
 //! Drag the four bars in the top-left corner to change the next clip: SPEED, PITCH, VIBRA (pitch
 //! wobble) and BRIGHT (overtones).
 //!
@@ -20,8 +21,6 @@
 //! `LocalTransform`), `aphyn_render` (`RenderApiResource::create_texture`, materials, `Camera`),
 //! `aphyn_render_features` (UI material template, `MaterialComponent`, `BatchedMeshComponent`,
 //! `CameraComponent`), `aphyn_asset_storage`, `aphyn_ecs`.
-
-use std::collections::HashSet;
 
 use aphyn::*;
 
@@ -203,7 +202,7 @@ fn spawn_scene(mut world: WorldDataMut) {
             mesh,
             material,
             ImageComponent {
-                color: CIRCLE_COLOR,
+                color: srgb_to_linear(CIRCLE_COLOR),
                 ..Default::default()
             },
         ),
@@ -322,37 +321,26 @@ fn text(font: &AssetHandle<Font>, text: &str, color: Vec4<f32>) -> TextComponent
         // UI space is y-down
         is_y_inverted: true,
         horizontal_spacing: UiVal::px(0.0),
-        color,
+        color: srgb_to_linear(color),
     }
 }
 
-// Aphyn v0.21.1 sends a `TextInputEvent` for every key event that carries text, without checking
-// that the key was pressed. On Linux (X11 and Wayland) releases carry text too; on Windows and macOS
-// only presses do. A held key does not repeat, so on Linux each release is paired with its press by
-// lowercase text and skipped ("H" pressed, Shift released, "h" released). A shifted symbol whose
-// Shift is released first (`!` then `1`) is still typed twice, and the next press of either
-// symbol can then be dropped. Remove this workaround once the engine sends text for presses only.
-const RELEASES_SEND_TEXT: bool = cfg!(all(unix, not(target_vendor = "apple"), not(target_os = "android")));
+// UI colors are linear; this turns an sRGB color (as a color picker shows it) into linear with
+// the exact sRGB curve. 0 and 1 are the same in both.
+fn srgb_to_linear(color: Vec4<f32>) -> Vec4<f32> {
+    let channel = |c: f32| {
+        if c <= 0.04045 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    };
+    color.xyz().map(channel).xyzn(color.w)
+}
 
-#[derive(Default)]
-struct PendingReleases(HashSet<String>);
-
-fn type_text(
-    text_input: Evt<TextInputEvent>,
-    mut pending_releases: Local<PendingReleases>,
-    mut fields: WorldQuery<&mut TextComponent, WithFilter<InputField>>,
-) {
+fn type_text(text_input: Evt<TextInputEvent>, mut fields: WorldQuery<&mut TextComponent, WithFilter<InputField>>) {
     for event in text_input.iter() {
         let typed = event.0.as_str();
-
-        if RELEASES_SEND_TEXT {
-            let key = typed.to_lowercase();
-            if pending_releases.0.remove(&key) {
-                continue;
-            }
-            pending_releases.0.insert(key);
-        }
-
         for field in fields.iter_mut() {
             if typed == "\u{8}" {
                 let mut text = field.text.to_string();

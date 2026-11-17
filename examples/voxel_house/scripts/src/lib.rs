@@ -1,4 +1,4 @@
-//! A voxel house with a tree next to it, 483 voxels on a ground slab under two directional lights,
+//! A voxel house with a tree next to it, 483 voxels on a ground slab under a directional light,
 //! where every voxel is its own cube entity. Space or Enter blows the house apart: each cube gets an
 //! outward and upward kick and a spin, falls under gravity, bounces on the ground and settles flat.
 //! Tab or R snaps every cube back to its place. Keys 1-9 rebuild the house at cube level N, with
@@ -17,8 +17,9 @@
 //! `aphyn_transform` (local/global transforms, UI rects), `aphyn_render` (`create_mesh`,
 //! materials, `Camera`, `CameraProjection`), `aphyn_render_features` (lit and UI material templates,
 //! `MeshComponent`, `MaterialComponent`, `BatchedMeshComponent`, `StandardLightComponent`,
-//! `CameraComponent`), `aphyn_asset_storage` (`AssetStorageResource`), `aphyn_ui` (`TextComponent`,
-//! built-in font), `aphyn_app` (keyboard input, `TimeResource`), `aphyn_math` (`Quat`).
+//! `AmbientLightResource`, `CameraComponent`), `aphyn_asset_storage` (`AssetStorageResource`),
+//! `aphyn_ui` (`TextComponent`, built-in font), `aphyn_app` (keyboard input, `TimeResource`),
+//! `aphyn_math` (`Quat`).
 
 use aphyn::*;
 

@@ -76,7 +76,7 @@ pub fn setup_scene(mut world: WorldDataMut) {
         .unwrap()
         .insert(normal_map);
 
-    let background_color = linear(pre_tonemap(srgb(NIGHT_900)), 1.0);
+    let background_color = pre_tonemap(srgb(NIGHT_900)).xyzn(1.0);
 
     let material = |template: &str, values: Vec<(&str, MaterialDataValue)>| {
         let mut data = MaterialData::new();
@@ -93,7 +93,7 @@ pub fn setup_scene(mut world: WorldDataMut) {
         material(
             BUILTIN_TEMPLATE_OPAQUE_LIT,
             vec![
-                ("color", vec4(linear(srgb(NIGHT_800), 1.0))),
+                ("color", vec4(srgb(NIGHT_800).xyzn(1.0))),
                 ("emission_color", vec4(background_color)),
                 ("metallic", f32(0.1)),
                 ("roughness", f32(0.5)),
@@ -103,24 +103,24 @@ pub fn setup_scene(mut world: WorldDataMut) {
         material(
             BUILTIN_TEMPLATE_OPAQUE_LIT,
             vec![
-                ("color", vec4(linear(srgb(BILBERRY_600), 1.0))),
-                ("emission_color", vec4(linear(srgb(BILBERRY_500), 0.15))),
+                ("color", vec4(srgb(BILBERRY_600).xyzn(1.0))),
+                ("emission_color", vec4(srgb(BILBERRY_500).xyzn(0.15))),
                 ("roughness", f32(0.3)),
             ],
         ),
         material(
             BUILTIN_TEMPLATE_OPAQUE_LIT,
             vec![
-                ("color", vec4(linear(srgb(BILBERRY_500), 1.0))),
-                ("emission_color", vec4(linear(srgb(BILBERRY_400), 0.35))),
+                ("color", vec4(srgb(BILBERRY_500).xyzn(1.0))),
+                ("emission_color", vec4(srgb(BILBERRY_400).xyzn(0.35))),
                 ("roughness", f32(0.5)),
             ],
         ),
         material(
             BUILTIN_TEMPLATE_OPAQUE_LIT,
             vec![
-                ("color", vec4(linear(srgb(BILBERRY_200), 1.0))),
-                ("emission_color", vec4(linear(srgb(BILBERRY_300), 3.5))),
+                ("color", vec4(srgb(BILBERRY_200).xyzn(1.0))),
+                ("emission_color", vec4(srgb(BILBERRY_300).xyzn(3.5))),
                 ("roughness", f32(0.5)),
             ],
         ),
@@ -213,6 +213,7 @@ pub fn setup_scene(mut world: WorldDataMut) {
             StandardLightComponent::Point {
                 color: srgb(NIGHT_100) * 6.0,
                 range: 30.0,
+                shadows: false,
             },
             LocalTransform {
                 position: Vec3::new(0.0, 1.4, 0.0),
@@ -226,6 +227,7 @@ pub fn setup_scene(mut world: WorldDataMut) {
         (
             StandardLightComponent::Directional {
                 color: srgb(BLOOM_300) * 0.6,
+                shadows: false,
             },
             LocalTransform {
                 rotation: Quat::rotation_y(0.7) * Quat::rotation_x(-0.5),
@@ -241,6 +243,7 @@ pub fn setup_scene(mut world: WorldDataMut) {
                 StandardLightComponent::Point {
                     color: srgb(BILBERRY_400) * 4.5,
                     range: 20.0,
+                    shadows: false,
                 },
                 LocalTransform::IDENTITY,
                 FlockLight(flock),
@@ -285,7 +288,7 @@ pub fn setup_scene(mut world: WorldDataMut) {
                 horizontal_align: HorizontalAlign::Left,
                 vertical_align: VerticalAlign::Top,
                 horizontal_spacing: UiVal::px(size * 0.12),
-                color: gamma(pre_tonemap(srgb(color)), 1.0),
+                color: pre_tonemap(srgb(color)).xyzn(1.0),
                 ..Default::default()
             },
         )
@@ -377,21 +380,6 @@ fn pre_tonemap(linear: Vec3<f32>) -> Vec3<f32> {
     };
     let multiplier = 2.0_f32.powf(EXPOSURE);
     Vec3::new(inverse_aces(linear.x), inverse_aces(linear.y), inverse_aces(linear.z)) / multiplier
-}
-
-// Material inputs are uploaded as is, so they take linear colors.
-fn linear(linear: Vec3<f32>, w: f32) -> Vec4<f32> {
-    Vec4::new(linear.x, linear.y, linear.z, w)
-}
-
-// Batched vertex colors are decoded with a 2.2 gamma before shading.
-fn gamma(linear: Vec3<f32>, w: f32) -> Vec4<f32> {
-    Vec4::new(
-        linear.x.powf(1.0 / 2.2),
-        linear.y.powf(1.0 / 2.2),
-        linear.z.powf(1.0 / 2.2),
-        w,
-    )
 }
 
 struct SplitMix64(u64);

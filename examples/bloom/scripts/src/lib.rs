@@ -88,6 +88,7 @@ fn spawn_scene(mut world: WorldDataMut) {
             StandardLightComponent::Point {
                 color: Vec3::splat(3_000.0),
                 range: 1_000.0,
+                shadows: false,
             },
             MaterialComponent {
                 material: light_material,

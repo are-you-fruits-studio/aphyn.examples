@@ -13,6 +13,6 @@ fn main() {
                 .resources_mut()
                 .insert(AssetsDirResource(assets_dir.to_string_lossy().as_ref().into()));
         }
-        lib_app::init_app(ctx);
+        aphynapp::init_app(ctx);
     });
 }

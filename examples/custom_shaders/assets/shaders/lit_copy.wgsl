@@ -4,6 +4,7 @@
 // built-in lit material and should draw exactly the same picture.
 #include "aphyn/standard_bindings.wgsl"
 #include "aphyn/pbr.wgsl"
+#include "aphyn/shadows.wgsl"
 
 struct VertexOutput {
     @builtin(position) position_clip: vec4<f32>,
@@ -53,7 +54,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     for (var i: u32 = 0; i < global_data.lights_count; i++) {
         let light = light_generic_to_fragment(lights[i], in.position_world);
 
-        color += cook_torrance_brdf(
+        let color_lit = cook_torrance_brdf(
             normal_world,
             view_dir,
             base.xyz,
@@ -62,7 +63,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             light.direction_src,
             light.color
         );
+
+        color += color_lit * light_shadow(lights[i], in.position_world, in.normal_world);
     }
+
+    color += global_data.ambient_color * base.xyz * (1.0 - metallic);
 
     return vec4<f32>(color, 1.0);
 }

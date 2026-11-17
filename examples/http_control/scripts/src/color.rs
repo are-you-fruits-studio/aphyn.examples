@@ -4,9 +4,9 @@ use aphyn::{parse_color_rgb_f32, parse_color_rgba_f32};
 // `NAMED`. The digits go through `aphyn_math`'s `parse_color_rgb_f32` / `parse_color_rgba_f32`, so each
 // channel is `byte / 255`.
 //
-// The renderer treats UI colors as sRGB: it raises them to the power 2.2, and an sRGB window surface
-// encodes them back with the exact sRGB curve. Channels from `4a` up show within 1 of the request;
-// lower ones come out darker (`40` shows as `3e`, `20` as `1a`, `05` as `01`).
+// The codes are sRGB, as a color picker shows them, and the color target is linear:
+// `srgb_to_linear` converts with the exact sRGB curve, and the sRGB window surface encodes the
+// color back.
 
 const NAMED: &[(&str, &str)] = &[
     ("black", "000000"),
@@ -49,4 +49,16 @@ pub fn parse(input: &str) -> Option<[f32; 4]> {
 pub fn to_hex(color: [f32; 4]) -> String {
     let [r, g, b, a] = color.map(|v| (v.clamp(0.0, 1.0) * 255.0).round() as u8);
     format!("{r:02x}{g:02x}{b:02x}{a:02x}")
+}
+
+pub fn srgb_to_linear(color: [f32; 4]) -> [f32; 4] {
+    let channel = |c: f32| {
+        if c <= 0.04045 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    };
+    let [r, g, b, a] = color;
+    [channel(r), channel(g), channel(b), a]
 }

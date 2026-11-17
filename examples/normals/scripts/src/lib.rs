@@ -63,6 +63,7 @@ pub fn init_app(ctx: AppInitCtx) {
             StandardLightComponent::Point {
                 color: Vec3::new(1.0, 1.0, 1.0),
                 range: 100.0,
+                shadows: false,
             },
             FollowCursor { distance: 1.5 },
         ),

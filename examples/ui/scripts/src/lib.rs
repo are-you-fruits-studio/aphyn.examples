@@ -133,7 +133,7 @@ fn spawn_ui(mut world: WorldDataMut) {
         grey_box,
         (
             ImageComponent {
-                color: Vec4::splat(0.6),
+                color: srgb_to_linear(Vec4::splat(0.6)),
                 ..Default::default()
             },
             ChildComponent { parent: panel },
@@ -260,7 +260,7 @@ fn spawn_rect(ec: &mut EntitiesHolderMut, material: &AssetHandle<Material>, rect
 
 // A child's `ChildComponent` is enough to parent it: the engine fills the parent's `ParentComponent`
 // from those links, but in query order. `RectChildAlignComponent` stacks the children in list order,
-// so the column lists them itself; the engine keeps a list it finds and only appends missing children.
+// so the column lists them itself; the engine keeps that order and only appends missing children.
 fn link(ec: &mut EntitiesHolderMut, parent: EntityId, children: &[EntityId]) {
     ec.add_component(
         parent,
@@ -273,6 +273,19 @@ fn link(ec: &mut EntitiesHolderMut, parent: EntityId, children: &[EntityId]) {
     for &child in children {
         ec.add_component(child, ChildComponent { parent }).ok().unwrap();
     }
+}
+
+// UI colors are linear; this turns an sRGB color (as a color picker shows it) into linear with
+// the exact sRGB curve. 0 and 1 are the same in both.
+fn srgb_to_linear(color: Vec4<f32>) -> Vec4<f32> {
+    let channel = |c: f32| {
+        if c <= 0.04045 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    };
+    color.xyz().map(channel).xyzn(color.w)
 }
 
 fn follow_cursor(

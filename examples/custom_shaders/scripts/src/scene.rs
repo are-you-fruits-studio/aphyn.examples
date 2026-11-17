@@ -144,6 +144,7 @@ fn spawn_lights(world: &mut WorldDataMut) {
             StandardLightComponent::Point {
                 color: Vec3::splat(55.0),
                 range: 100.0,
+                shadows: false,
             },
         ),
     );
@@ -156,6 +157,7 @@ fn spawn_lights(world: &mut WorldDataMut) {
             StandardLightComponent::Point {
                 color: Vec3::new(30.0, 24.0, 16.0),
                 range: 100.0,
+                shadows: false,
             },
             OrbitingLight,
         ),
@@ -184,10 +186,16 @@ fn parity_materials(world: &mut WorldDataMut) -> (AssetHandle<Material>, AssetHa
             .get_registered("shaders/lit_copy.asset")
             .cloned()
             .expect("shaders/lit_copy.asset not loaded");
+        // the same shadow caster pass as the engine's opaque templates
+        let shadow_caster = res
+            .get::<AssetStorageResource<Shader>>()
+            .unwrap()
+            .get_registered(BUILTIN_SHADER_SHADOW_CASTER)
+            .cloned();
         let template = res
             .get_mut::<AssetStorageResource<MaterialTemplate>>()
             .unwrap()
-            .insert(standard_material_template(shader, false));
+            .insert(standard_material_template(shader, false, shadow_caster));
 
         let render_api = res.get::<RenderApiResource>().unwrap();
         let templates = res.get::<AssetStorageResource<MaterialTemplate>>().unwrap();
@@ -296,7 +304,7 @@ fn spawn_label(world: &mut WorldDataMut, style: &TextStyle, column: usize, row: 
                 vertical_align: VerticalAlign::Middle,
                 is_y_inverted: false,
                 horizontal_spacing: UiVal::px(0.0),
-                color: LABEL_COLOR,
+                color: srgb_to_linear(LABEL_COLOR),
             },
         ),
     );
@@ -332,12 +340,25 @@ fn spawn_status_line(world: &mut WorldDataMut) {
                 font,
                 font_size: UiVal::ph(1.0),
                 horizontal_align: HorizontalAlign::Middle,
-                color: Vec4::new(0.9, 0.95, 1.0, 1.0),
+                color: srgb_to_linear(Vec4::new(0.9, 0.95, 1.0, 1.0)),
                 ..Default::default()
             },
             StatusText,
         ),
     );
+}
+
+// UI and text colors are linear; this turns an sRGB color (as a color picker shows it) into linear
+// with the exact sRGB curve.
+fn srgb_to_linear(color: Vec4<f32>) -> Vec4<f32> {
+    let channel = |c: f32| {
+        if c <= 0.04045 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    };
+    color.xyz().map(channel).xyzn(color.w)
 }
 
 fn registered_material(world: &WorldDataMut, key: &str) -> AssetHandle<Material> {
