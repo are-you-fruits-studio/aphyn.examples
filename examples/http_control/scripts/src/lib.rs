@@ -8,13 +8,12 @@
 //! 8787, or the value of the `HTTP_CONTROL_PORT` environment variable (`0` picks a free port, which
 //! is printed at startup). The endpoints are listed in the example's README and at `GET /`.
 //!
-//! The engine always clears the window to black, so the color is a UI rect the size of the window,
-//! recolored through its `ImageComponent`.
+//! The color is the window's clear color: a small render feature clears the color target with it
+//! at `RENDER_ORDER_PREPARE`, before anything else is drawn.
 //!
-//! Engine modules: `aphyn_ui` (`ImageComponent`), `aphyn_render_features` (UI material template,
-//! `MaterialComponent`, `BatchedMeshComponent`, `CameraComponent`), `aphyn_render` (`Material`,
-//! `Camera`), `aphyn_transform` (rect and camera transforms), `aphyn_asset_storage`, `aphyn_math`
-//! (color parsing), `aphyn_ecs`.
+//! Engine modules: `aphyn_render_features` (`RenderFeature`, `RENDER_ORDER_PREPARE`,
+//! `CameraComponent`), `aphyn_render` (`CurrentRenderingResource`, `clear_color_target`, `Camera`),
+//! `aphyn_transform` (camera transform), `aphyn_math` (color parsing), `aphyn_ecs`.
 
 use aphyn::*;
 
@@ -23,15 +22,23 @@ mod server;
 
 use server::HttpControlResource;
 
-// a dark grey, so a running app that has not been driven yet differs from the black clear color
+// a dark grey, so a running app that has not been driven yet differs from a black window
 const INITIAL_COLOR: [f32; 4] = [0.1, 0.1, 0.12, 1.0];
 
 aphyn_entry_point!(init_app);
 
 pub fn init_app(ctx: AppInitCtx) {
     let AppInitCtx {
-        mut data, mut behavior, ..
+        mut data,
+        mut behavior,
+        render,
+        ..
     } = ctx;
+
+    assert!(render.add_feature("http_control_clear", ClearFeature));
+    data.as_mut()
+        .resources_mut()
+        .insert(ClearColorResource(color::srgb_to_linear(INITIAL_COLOR)));
 
     // bound here, before the window opens, so a busy port is reported up front; the app still runs
     match HttpControlResource::start(INITIAL_COLOR) {
@@ -49,17 +56,12 @@ pub fn init_app(ctx: AppInitCtx) {
         }
     }
 
-    let mut start = behavior.as_mut();
-    let mut start = start.get_mut(Schedule::Start);
-    start.insert_system(spawn_screen_fill);
-    start.order_group(SYSTEM_GROUP_RENDER).before_system(spawn_screen_fill);
-
     let mut update = behavior.as_mut();
     let mut update = update.get_mut(Schedule::Update);
     update.insert_system(apply_pending_color);
-    update.order_system(apply_pending_color).before_group(SYSTEM_GROUP_UI);
+    update.order_system(apply_pending_color).before_group(SYSTEM_GROUP_RENDER);
 
-    // nothing renders without a camera, even when everything on screen is UI
+    // render features run per camera view, so the clear needs a camera even with nothing to draw
     let mut ec = data.as_mut().into_entities_mut();
     let camera = ec.create_entity();
     ec.set_components(
@@ -80,54 +82,29 @@ pub fn init_app(ctx: AppInitCtx) {
     );
 }
 
-#[derive(Component)]
-struct ScreenFill;
+// linear, as the HDR color target stores it
+#[derive(Resource)]
+struct ClearColorResource([f32; 4]);
 
-fn spawn_screen_fill(mut world: WorldDataMut) {
-    // one white material; the rect's color comes from ImageComponent.color
-    let material = create_material_from_template_key(
-        world.as_ref().resources(),
-        BUILTIN_TEMPLATE_UI_OPAQUE_UNLIT,
-        MaterialData::new(),
-    )
-    .unwrap();
-    let material = world
-        .as_mut()
-        .resources_mut()
-        .get_mut::<AssetStorageResource<Material>>()
-        .unwrap()
-        .insert(material);
+struct ClearFeature;
 
-    let mut ec = world.entities_mut();
-    let fill = ec.create_entity();
-    ec.set_components(
-        fill,
-        (
-            ScreenFill,
-            LocalRectComponent {
-                anchor: Vec2::splat(0.5),
-                pivot: Vec2::splat(0.5),
-                // relative to the window, so it stays full size when the window is resized
-                scale: Vec2::new(UiVal::vw(1.0).into(), UiVal::vh(1.0).into()),
-                z: -10.0,
-                ..Default::default()
-            },
-            BatchedMeshComponent::default(),
-            MaterialComponent { material },
-            ImageComponent {
-                color: Vec4::from_array(INITIAL_COLOR),
-                ..Default::default()
-            },
-        ),
-    );
+impl RenderFeature for ClearFeature {
+    fn add_passes(&mut self, _world: WorldDataMut, _thread_pool: ThreadPoolAccess, passes: &mut RenderPassWriter<Self>) {
+        passes.add(RENDER_ORDER_PREPARE, |_, ctx| clear_window(ctx));
+    }
 }
 
-// The opaque UI template discards fragments with alpha below its `alpha_threshold` (0.5), so an
-// alpha byte under 0x80 leaves the window black and anything from 0x80 up draws fully opaque.
-fn apply_pending_color(
-    server: Option<Res<HttpControlResource>>,
-    mut fills: WorldQuery<&mut ImageComponent, WithFilter<ScreenFill>>,
-) {
+fn clear_window(ctx: &mut RenderPassCtx) {
+    let resources = ctx.world.resources();
+    if let (Some(current), Some(clear)) = (
+        resources.get::<CurrentRenderingResource>(),
+        resources.get::<ClearColorResource>(),
+    ) {
+        clear_color_target(ctx.render_api, &current.target, clear.0);
+    }
+}
+
+fn apply_pending_color(server: Option<Res<HttpControlResource>>, mut clear: ResMut<ClearColorResource>) {
     let Some(server) = server else {
         return;
     };
@@ -135,9 +112,7 @@ fn apply_pending_color(
         return;
     };
 
-    for image in fills.iter_mut() {
-        image.color = Vec4::from_array(rgba);
-    }
+    clear.0 = color::srgb_to_linear(rgba);
     server.set_applied(rgba);
     println!("[http_control] #{} applied {}", server.accepted_count(), color::to_hex(rgba));
 }

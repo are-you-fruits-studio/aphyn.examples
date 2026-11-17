@@ -40,13 +40,14 @@ green blue yellow cyan magenta orange gray`. The 3-digit form doubles each digit
 `ff00cc`). A leading `#` is accepted, but a literal `#` cannot be sent in a URL path: encode it as
 `%23`.
 
-An alpha below `80` leaves the window black, since the opaque UI material discards those pixels;
-`80` and above draw fully opaque.
+The alpha byte is accepted and reported back by `GET /color`, but it does not change the window:
+the color fills the whole color target, and nothing behind it shows through.
 
-`GET /color` returns the value that was applied, not pixels read back. On screen, each channel
-from `4a` up shows within 1 of the request; lower channels come out darker (`40` shows as `3e`,
-`20` as `1a`, `05` as `01`, so `%23336699` shows as `30669a`), because UI colors are converted with
-a 2.2 power curve and the window surface encodes them with the exact sRGB curve.
+`GET /color` returns the value that was applied, not pixels read back. The code is an sRGB color,
+as a color picker shows it. The example makes it the window's clear color: a render feature clears
+the color target with it before anything is drawn. The target is linear, so the code is converted
+with the exact sRGB curve, and the window surface encodes it back. The window shows the requested
+color (`%23336699` shows as `336699`).
 
 ## Examples
 

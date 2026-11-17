@@ -6,6 +6,10 @@ use crate::materials::Materials;
 use crate::mesh::upload_cube;
 use crate::rebuild::{CountText, Cubes, DEFAULT_LEVEL, HouseAssets};
 
+// linear light every lit face gets from all around; faces turned away from the key light get
+// only this
+const AMBIENT_LIGHT: f32 = 0.075;
+
 const HINT: &str = "SPACE / ENTER: explode     TAB / R: reset     1-9: cube level";
 
 pub fn spawn_camera(mut data: WorldDataMut) {
@@ -65,25 +69,26 @@ pub fn setup_scene(mut world: WorldDataMut) {
     world.resources_mut().insert(HouseAssets { cube, materials });
 }
 
-// A strong key light and a weak fill from the other side, so faces away from the key light are not
-// pure black. Directional lights shine along their local -Y axis.
+// A directional key light, and an ambient light so faces turned away from it are not pure black.
+// Directional lights shine along their local -Y axis.
 fn spawn_lights(world: &mut WorldDataMut) {
+    world.resources_mut().get_mut::<AmbientLightResource>().unwrap().color = Vec3::splat(AMBIENT_LIGHT);
+
     let mut ec = world.entities_mut();
-    for (yaw, pitch, strength) in [(-30.0_f64, -55.0_f64, 1.5_f32), (150.0, -35.0, 0.45)] {
-        let light = ec.create_entity();
-        ec.set_components(
-            light,
-            (
-                LocalTransform {
-                    rotation: Quat::rotation_y(yaw.to_radians()) * Quat::rotation_x(pitch.to_radians()),
-                    ..LocalTransform::IDENTITY
-                },
-                StandardLightComponent::Directional {
-                    color: Vec3::splat(strength),
-                },
-            ),
-        );
-    }
+    let light = ec.create_entity();
+    ec.set_components(
+        light,
+        (
+            LocalTransform {
+                rotation: Quat::rotation_y(-30_f64.to_radians()) * Quat::rotation_x(-55_f64.to_radians()),
+                ..LocalTransform::IDENTITY
+            },
+            StandardLightComponent::Directional {
+                color: Vec3::splat(1.5),
+                shadows: false,
+            },
+        ),
+    );
 }
 
 // A line of HUD text centered at `y`; `y` and `height` are fractions of the window height, `y` from the top.

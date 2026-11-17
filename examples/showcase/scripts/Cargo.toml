@@ -6,7 +6,7 @@ license = "MIT OR Apache-2.0"
 publish = false
 
 [lib]
-name = "lib_app"
+name = "aphynapp"
 crate-type = ["cdylib", "lib"]
 
 [[bin]]
@@ -14,5 +14,5 @@ name = "launcher"
 path = "src/main.rs"
 
 [dependencies]
-aphyn = { git = "https://github.com/are-you-fruits-studio/aphyn", tag = "v0.21.1" }
+aphyn = { git = "https://github.com/are-you-fruits-studio/aphyn", tag = "v0.23.0" }
 png = "0.18"
