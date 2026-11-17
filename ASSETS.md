@@ -27,3 +27,6 @@ An asset is listed here before it is committed; an asset with an unknown license
 | `examples/custom_shaders/assets/shaders/lib/lights.wgsl` | Written for this example | MIT OR Apache-2.0 | Are You Fruits studio |
 | `examples/custom_shaders/assets/shaders/lib/noise.wgsl` | Written for this example | MIT OR Apache-2.0 | Are You Fruits studio |
 | `examples/shadows/assets/cube.obj` | From are-you-fruits-studio/aphyn@ec3f8c5, `crates/example/shadows/assets/` | MIT OR Apache-2.0 | Are You Fruits studio |
+| `examples/compute/assets/snowflake.obj` | From are-you-fruits-studio/aphyn@ec3f8c5, `crates/example/compute/assets/` | MIT OR Apache-2.0 | Are You Fruits studio |
+| `examples/compute/assets/snowflake_draw.wgsl` | From are-you-fruits-studio/aphyn@ec3f8c5, `crates/example/compute/assets/` | MIT OR Apache-2.0 | Are You Fruits studio |
+| `examples/compute/assets/snowflakes_update.wgsl` | From are-you-fruits-studio/aphyn@ec3f8c5, `crates/example/compute/assets/` | MIT OR Apache-2.0 | Are You Fruits studio |

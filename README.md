@@ -30,6 +30,7 @@ with `aphyn build`.
 | [custom_shaders](examples/custom_shaders) | Custom WGSL shaders as assets: attribute debug views, a copy of the lit shader, toon, vertex waves, dissolve with bloom (F5 reloads shaders, B toggles bloom) | `just dev custom_shaders` |
 | [voxel_house](examples/voxel_house) | Stress test: a house of cube entities that explodes (Space), resets (R) and rebuilds from up to 352k cubes (1-9) | `just dev voxel_house` |
 | [shadows](examples/shadows) | Shadow mapping: a turning sun with cascaded shadows and a spot light with a shadow over boxes on a floor; a point light without one | `just dev shadows` |
+| [compute](examples/compute) | Compute shaders: 50,000 snowflakes simulated in a compute shader and drawn instanced straight from its buffer; the mesh and both WGSL shaders are asset files | `just dev compute` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
 
