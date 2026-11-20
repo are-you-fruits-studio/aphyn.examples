@@ -28,6 +28,7 @@ with `aphyn build`.
 | [http_control](examples/http_control) | The window color set over a loopback HTTP port: a server thread hands commands to the ECS | `just dev http_control` |
 | [babble](examples/babble) | Typed text turned into procedural gibberish speech, played back while a circle pulses with its loudness; sliders for speed, pitch, vibrato and brightness | `just dev babble` |
 | [custom_shaders](examples/custom_shaders) | Custom WGSL shaders as assets: attribute debug views, a copy of the lit shader, toon, vertex waves, dissolve with bloom (F5 reloads shaders, B toggles bloom) | `just dev custom_shaders` |
+| [clustered_lights](examples/clustered_lights) | Many lights on many objects: 2000 lit cubes and spheres under 1024 moving point and spot lights, shaded with clustered lighting; depends on the local engine checkout until the next release | `just dev clustered_lights` |
 | [voxel_house](examples/voxel_house) | Stress test: a house of cube entities that explodes (Space), resets (R) and rebuilds from up to 352k cubes (1-9) | `just dev voxel_house` |
 
 `just dev <name>` is `cargo run --manifest-path examples/<name>/scripts/Cargo.toml`.
